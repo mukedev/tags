@@ -68,8 +68,8 @@ public class HBaseBulkloader {
         hadoopConf.set(DEFAULT_FS, "hdfs://csc1563939540796:8020");
         hadoopConf.set(DFS_REPLICATION, "1");
         hadoopConf.set(HBASE_ZK_PORT_KEY, "2181");
-        hadoopConf.set(HBASE_ZK_QUORUM_KEY, "192.168.10.20");
-        hadoopConf.set(HBASE_ZK_PARENT_KEY, "/hbase-unsecure");
+        hadoopConf.set(HBASE_ZK_QUORUM_KEY, "server10");
+        hadoopConf.set(HBASE_ZK_PARENT_KEY, "/hbase");
         hadoopConf.set(TableOutputFormat.OUTPUT_TABLE, tableName);
 
         Job job = Job.getInstance(hadoopConf, appName);

@@ -215,8 +215,8 @@ public class Tag1554Model implements Serializable {
         try {
             Configuration conf = HBaseConfiguration.create(jsc.hadoopConfiguration());
             conf.set("hbase.zookeeper.property.clientPort", "2181");
-            conf.set("hbase.zookeeper.quorum", "192.168.10.20");
-            conf.set("zookeeper.znode.parent", "/hbase-unsecure");
+            conf.set("hbase.zookeeper.quorum", "server10");
+            conf.set("zookeeper.znode.parent", "/hbase");
             conf.set(TableOutputFormat.OUTPUT_TABLE, tableName);
             Job job = Job.getInstance(conf);
             job.setOutputKeyClass(ImmutableBytesWritable.class);

@@ -1121,7 +1121,7 @@ public class HBaseUtil {
         Configuration conf = HBaseConfiguration.create();
         conf.set("hbase.zookeeper.quorum", "192.168.10.20");
         conf.set("hbase.zookeeper.property.clientPort", "2181");
-        conf.set("zookeeper.znode.parent", "/hbase-unsecure");
+        conf.set("zookeeper.znode.parent", "/hbase");
         HBaseHelper hBaseHelper = new HBaseHelper(conf);
         try {
             connection = hBaseHelper.getConnection();
@@ -1134,7 +1134,7 @@ public class HBaseUtil {
         Configuration conf = HBaseConfiguration.create();
         conf.set("hbase.zookeeper.quorum", addr);
         conf.set("hbase.zookeeper.property.clientPort", port);
-        conf.set("zookeeper.znode.parent", "/hbase-unsecure");
+        conf.set("zookeeper.znode.parent", "/hbase");
         HBaseHelper hBaseHelper = new HBaseHelper(conf);
         try {
             connection = hBaseHelper.getConnection();

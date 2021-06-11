@@ -44,7 +44,7 @@ public class HBaseRelation extends BaseRelation implements Serializable, TableSc
     private final String HBASE_ZK_QUORUM_KEY = "hbase.zookeeper.quorum";
     private final String HBASE_ZK_QUORUM_VALUE = "zkHosts";
     private final String HBASE_ZK_PARENT_KEY = "zookeeper.znode.parent";
-    private final String HBASE_ZK_PARENT_VALUE = "/hbase-unsecure";
+    private final String HBASE_ZK_PARENT_VALUE = "/hbase";
     private final String HBASE_TABLE = "hbaseTable";
     private final String HBASE_TABLE_FAMILY = "family";
     private final String HBASE_TABLE_SELECT_FIELDS = "selectFields";

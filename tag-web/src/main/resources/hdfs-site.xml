@@ -4,15 +4,15 @@
 <configuration>
   <property>
     <name>dfs.namenode.name.dir</name>
-    <value>file:///dfs/nn</value>
+    <value>file:///home/cm/dfs/nn</value>
   </property>
   <property>
     <name>dfs.namenode.servicerpc-address</name>
-    <value>csc1563939540796:8022</value>
+    <value>server10:8022</value>
   </property>
   <property>
     <name>dfs.https.address</name>
-    <value>csc1563939540796:9871</value>
+    <value>server10:9871</value>
   </property>
   <property>
     <name>dfs.https.port</name>
@@ -20,7 +20,7 @@
   </property>
   <property>
     <name>dfs.namenode.http-address</name>
-    <value>csc1563939540796:9870</value>
+    <value>server10:9870</value>
   </property>
   <property>
     <name>dfs.replication</name>
@@ -37,10 +37,6 @@
   <property>
     <name>fs.permissions.umask-mode</name>
     <value>022</value>
-  </property>
-  <property>
-    <name>dfs.client.block.write.locateFollowingBlock.retries</name>
-    <value>7</value>
   </property>
   <property>
     <name>dfs.namenode.acls.enabled</name>

@@ -12,6 +12,7 @@
         <module>tag-model</module>
         <module>tag-web</module>
         <module>tag_model_new</module>
+        <module>tag-model-scala</module>
     </modules>
 
     <properties>
@@ -137,11 +138,11 @@
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>com.fasterxml.jackson.core</groupId>-->
-<!--                <artifactId>jackson-databind</artifactId>-->
-<!--                <version>${jackson.version}</version>-->
-<!--            </dependency>-->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
