@@ -1,5 +1,8 @@
 package cn.muke.model.utils
 
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
+
 import scala.collection.mutable
 
 /**
@@ -33,6 +36,19 @@ object ShcConfUtil {
     val catalogJSON = write(catalog)
 
     println(catalogJSON)
+
+    // 4.读取HBase代码
+    val spark = SparkSession.builder()
+      .appName(this.getClass.getSimpleName)
+      .master("local[4]")
+      .getOrCreate()
+
+    val source = spark.read
+      .option(HBaseTableCatalog.tableCatalog, catalogJSON)
+      .format("org.apache.spark.sql.execution.datasources.hbase")
+      .load()
+
+    source.show()
 
   }
 
