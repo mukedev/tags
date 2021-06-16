@@ -47,7 +47,8 @@
         <!-- 数据 -->
         <scala.version>2.11.12</scala.version>
         <spark.version>2.4.0</spark.version>
-        <hadoop.version>3.0.0</hadoop.version>
+<!--        <hadoop.version>3.0.0</hadoop.version>-->
+        <hadoop.version>2.7.2</hadoop.version>
 
         <!-- 数据库 -->
         <mysql.version>8.0.17</mysql.version>

@@ -2,16 +2,16 @@ package cn.muke.model.utils
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
-import org.apache.hadoop.hbase.client.{ClusterConnection, ColumnFamilyDescriptorBuilder, ConnectionFactory, HRegionLocator, RegionLocator, Table, TableDescriptor, TableDescriptorBuilder}
-import org.apache.hadoop.hbase.{HBaseConfiguration, KeyValue, TableName}
+import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable
 import org.apache.hadoop.hbase.mapred.TableOutputFormat
 import org.apache.hadoop.hbase.mapreduce.HFileOutputFormat2
 import org.apache.hadoop.hbase.tool.LoadIncrementalHFiles
 import org.apache.hadoop.hbase.util.Bytes
+import org.apache.hadoop.hbase.{HBaseConfiguration, KeyValue, TableName}
 import org.apache.hadoop.mapreduce.Job
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import org.apache.spark.sql.{Dataset, Row, SparkSession}
 
 /**
  *
@@ -60,7 +60,9 @@ object Hive2HBase {
     // 1.4 job配置: 配置value的类型
     job.setMapOutputKeyClass(classOf[KeyValue])
 
-
+    val currentHFilePath = s"$hFilePath/$sourceTableName"
+    hive2HFile(sourceDbName, sourceTableName, sourceKeyFieldName, currentHFilePath, hadoopConfig)
+    hFile2HBase(job, sourceTableName, currentHFilePath)
   }
 
   /**
@@ -68,46 +70,44 @@ object Hive2HBase {
    * 来源：Hive表
    * 落地：HDFS
    */
-  def hive2HFile(db: String, table: String, keyField: String, config: Configuration): Unit = {
+  def hive2HFile(db: String, table: String, keyField: String, hFilePath: String, config: Configuration): Unit = {
     // 1. 加载数据
     val source: Dataset[Row] = spark.read.table(s"${db}.${table}")
 
     // 2. 处理数据 处理成（ImmutableBytesWritable, KeyValue）
     val transfer: RDD[(ImmutableBytesWritable, KeyValue)] = source.rdd
-      .filter(filed => filed.getAs(keyField) != null)
+      .filter(row => row.getAs(keyField) != null)
+      .sortBy(row => s"${row.getAs(keyField)}")
       // 使用flatMap 是因为读取的是一行，但是一个hbase数据只是分布在一行的一个单元格
-      .flatMap({
-        row => {
-          // hbase中所有的数据类型都是Bytes
-          // 获取RowKey的值
-          val rowKeyBytes = Bytes.toBytes(s"${row.getAs(keyField)}")
+      .flatMap(row => {
+        // hbase中所有的数据类型都是Bytes
+        // 获取RowKey的值
+        val rowKeyBytes = Bytes.toBytes(s"${row.getAs(keyField)}")
 
-          // 把row拆开，转换成cells形式，多个单元格，对每一个单元格处理,转换kv类型返回
-          val hFileKV: Seq[(ImmutableBytesWritable, KeyValue)] = row.schema
-            .filter(field => field.name != null)
-            .sortBy(field => field.name)
-            .map({
-              field => {
-                // 获取row的每一个单元格的field name 和 value
-                val fieldBytes = Bytes.toBytes(s"${field.name}")
-                val valueBytes = Bytes.toBytes(s"${row.getAs(field.name)}")
+        // 把row拆开，转换成cells形式，多个单元格，对每一个单元格处理,转换kv类型返回
+        val hFileKV: Seq[(ImmutableBytesWritable, KeyValue)] = row.schema
+          .filter(field => row.getAs(field.name) != null)
+          .sortBy(field => field.name)
+          .map(field => {
+            // 获取row的每一个单元格的field name 和 value
+            val fieldNameBytes = Bytes.toBytes(s"${field.name}")
+            val valueBytes = Bytes.toBytes(s"${row.getAs(field.name)}")
 
-                // 生成KeyValue对象返回
-                val kv = new KeyValue(rowKeyBytes, defaultHBaseCF.getBytes(), fieldBytes, valueBytes)
+            // 生成KeyValue对象返回
+            val kv = new KeyValue(rowKeyBytes, defaultHBaseCF.getBytes(), fieldNameBytes, valueBytes)
 
-                (new ImmutableBytesWritable(rowKeyBytes), kv)
-              }
-            })
-          hFileKV
-        }
-      })
+            (new ImmutableBytesWritable(rowKeyBytes), kv)
+          })
+        hFileKV
+      }
+      )
 
     // 3. 数据落地
     transfer.saveAsNewAPIHadoopFile(
       hFilePath,
-      Class[ImmutableBytesWritable],
-      Class[KeyValue],
-      Class[HFileOutputFormat2],
+      classOf[ImmutableBytesWritable],
+      classOf[KeyValue],
+      classOf[HFileOutputFormat2],
       config
     )
 
@@ -116,7 +116,7 @@ object Hive2HBase {
   /**
    * 通过hbase的Api 将hFile数据加载到hbase中
    */
-  def hFile2HBase(job: Job, table: String): Unit = {
+  def hFile2HBase(job: Job, table: String, hFilePath: String): Unit = {
     // 1. 配置 connection admin
     val connection = ConnectionFactory.createConnection(job.getConfiguration)
     val admin = connection.getAdmin
@@ -135,8 +135,8 @@ object Hive2HBase {
 
     // 3.调用API进行bulkload
     val realTable = connection.getTable(tableName)
-    val loader = new LoadIncrementalHFiles(job.getConfiguration)
     val regionLocator = new HRegionLocator(tableName, connection.asInstanceOf[ClusterConnection])
-    loader.doBulkLoad(new Path(hFilePath),admin,realTable,regionLocator)
+    val loader = new LoadIncrementalHFiles(job.getConfiguration)
+    loader.doBulkLoad(new Path(hFilePath), admin, realTable, regionLocator)
   }
 }
