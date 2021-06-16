@@ -1,5 +1,6 @@
 package cn.muke.model.utils
 
+import cn.muke.model.{HBaseCatalog, HBaseColumn, HBaseTable}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
 
@@ -49,25 +50,6 @@ object ShcConfUtil {
       .load()
 
     source.show()
-
   }
-
-  /**
-   * 根据catalog的json配置创建类
-   * {
-   * "table":{"namespace":"default","name":"tb_test"},
-   * "rowkey":"id",
-   * "columns":{
-   * "id":{"cf":"rowkey","col":"id","type":"string"},
-   * "userName":{"cf":"default","col":"username","type":"string"}
-   * }
-   * }
-   */
-  case class HBaseCatalog(table: HBaseTable, rowkey: String, columns: Map[String, HBaseColumn])
-
-  case class HBaseTable(namespace: String, name: String)
-
-  case class HBaseColumn(cf: String, col: String, `type`: String)
-
 
 }
