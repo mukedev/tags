@@ -10,7 +10,6 @@ import org.apache.hadoop.hbase.tool.LoadIncrementalHFiles
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.{HBaseConfiguration, KeyValue, TableName}
 import org.apache.hadoop.mapreduce.Job
-import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Dataset, Row, SparkSession}
 
 /**
@@ -28,11 +27,6 @@ object Hive2HBase {
   val defaultHBaseCF = "default"
   val hFilePath = "/user/admin/data_extra/hfile_cache"
   val hbaseDefaultNamespace = "default"
-
-  val spark = SparkSession.builder()
-    .appName(s"${this.getClass.getSimpleName}")
-    .enableHiveSupport() // 开启hive支持
-    .getOrCreate()
 
   /**
    *
@@ -71,11 +65,17 @@ object Hive2HBase {
    * 落地：HDFS
    */
   def hive2HFile(db: String, table: String, keyField: String, hFilePath: String, config: Configuration): Unit = {
+    // 创建 SparkSession
+    val spark = SparkSession.builder()
+      .appName(s"${this.getClass.getSimpleName}")
+      .enableHiveSupport() // 开启hive支持
+      .getOrCreate()
+
     // 1. 加载数据
     val source: Dataset[Row] = spark.read.table(s"${db}.${table}")
 
     // 2. 处理数据 处理成（ImmutableBytesWritable, KeyValue）
-    val transfer: RDD[(ImmutableBytesWritable, KeyValue)] = source.rdd
+    val transfer = source.rdd
       .filter(row => row.getAs(keyField) != null)
       .sortBy(row => s"${row.getAs(keyField)}")
       // 使用flatMap 是因为读取的是一行，但是一个hbase数据只是分布在一行的一个单元格
