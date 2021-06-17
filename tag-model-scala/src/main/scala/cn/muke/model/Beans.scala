@@ -21,7 +21,6 @@ case class HBaseTable(namespace: String, name: String)
 case class HBaseColumn(cf: String, col: String, `type`: String)
 
 
-
 /**
  * 所有标签对应的样例类
  */
@@ -51,7 +50,7 @@ case class MetaData(in_type: String, driver: String, url: String, username: Stri
   }
 
   def toMySqlMeta(): MySqlMeta = {
-    if (isRDBMS()) {
+    if (!isRDBMS()) {
       return null
     }
     val commonMeta = CommonMeta(in_type, in_fields.split(","), out_fields.split(","))
@@ -60,19 +59,19 @@ case class MetaData(in_type: String, driver: String, url: String, username: Stri
   }
 
   def toHBaseMeta(): HBaseMeta = {
-    if (isHBase()) {
+    if (!isHBase()) {
       return null
     }
     if (StringUtils.isBlank(in_fields) || StringUtils.isBlank(out_fields)) {
       return null
     }
     val commonMeta = CommonMeta(in_type, in_fields.split(","), out_fields.split(","))
-    val hBaseMeta = HBaseMeta(commonMeta, hbase_table, family)
+    val hBaseMeta = HBaseMeta(commonMeta, hbase_table, "default") //因为数据导入hbase的时候列族都设置成了 default
     hBaseMeta
   }
 
   def toHdfsMeta(): HdfsMeta = {
-    if (isHdfs()) {
+    if (!isHdfs()) {
       return null
     }
     val commonMeta = CommonMeta(in_type, in_fields.split(","), out_fields.split(","))
