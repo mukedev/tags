@@ -4,12 +4,12 @@ import cn.muke.model.{BasicModel, Tag}
 import org.apache.spark.sql.{Column, DataFrame}
 
 /**
- * 性别标签
+ * 职业标签
  *
  * @author zhangyu
  *
  */
-object GenderModel extends BasicModel {
+object JobModel extends BasicModel {
 
   def main(args: Array[String]): Unit = {
     startFlow()
@@ -20,8 +20,7 @@ object GenderModel extends BasicModel {
    *
    * @return
    */
-  override def initTagName(): String = "性别"
-
+  override def initTagName(): String = "职业"
 
   /**
    * 抽象方法：计算标签
@@ -32,23 +31,21 @@ object GenderModel extends BasicModel {
    * @return
    */
   override def process(source: DataFrame, fiveTags: Array[Tag], outField: Array[String]): DataFrame = {
-    // 1 导入spark隐式转换
-    import spark.implicits._
+    // 1. 导入spark隐式函数
     import org.apache.spark.sql.functions._
+    import spark.implicits._
 
-    // 2 拼接条件
+    // 2. 拼接Condition
     var condition: Column = null
     for (tag <- fiveTags) {
       if (condition == null)
-        condition = when('gender === tag.rule, tag.id)
+        condition = when('job === tag.rule, tag.id)
       else
-        condition = condition.when('gender === tag.rule, tag.id)
+        condition = condition.when('job === tag.rule, tag.id)
     }
 
+    // 3. 筛选过滤数据
     condition = condition.as(outField.head)
-
-    // 3 查询过滤数据
     source.select('id, condition)
   }
-
 }

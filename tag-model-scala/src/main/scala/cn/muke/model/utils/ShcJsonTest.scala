@@ -12,7 +12,7 @@ import scala.collection.mutable
  * @author zhangyu
  *
  */
-object ShcConfUtil {
+object ShcJsonTest {
 
   def main(args: Array[String]): Unit = {
 
