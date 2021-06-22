@@ -30,13 +30,13 @@ trait BasicModel {
     // 2.通过四级标签读取元素数据
     // 3.处理元数据，处理成结构化的方式
     val metaData = readMetaData(fourTag.id)
-
+    println(metaData)
     // 4.使用元数据连接源表，拿到源表数据
     val (source, commonMeta) = createSource(metaData)
-
+    source.show()
     // 5.匹配计算标签数据
     val result = process(source, fiveTags, commonMeta.outFields)
-
+    result.show()
     // 6.把标签信息放入用户画像表
     saveUserProfile(result, commonMeta.outFields)
 
