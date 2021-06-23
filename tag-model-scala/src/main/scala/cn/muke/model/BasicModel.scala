@@ -36,9 +36,12 @@ trait BasicModel {
     source.show()
     // 5.匹配计算标签数据
     val result = process(source, fiveTags, commonMeta.outFields)
-    result.show()
-    // 6.把标签信息放入用户画像表
-    saveUserProfile(result, commonMeta.outFields)
+
+    if (result != null) {
+      result.show()
+      // 6.把标签信息放入用户画像表
+      saveUserProfile(result, commonMeta.outFields)
+    }
 
   }
 
